@@ -1,0 +1,4 @@
+<plugin id="com.example">
+  <feature extension="ant.import" file="build.xml"/>
+  <transtype name="docusaurus" extends="mdx" desc="Docusaurus"/>
+</plugin>

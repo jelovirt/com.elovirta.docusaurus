@@ -1,0 +1,9 @@
+<project>
+  <target name="dita2docusaurus" depends="markdown_docusaurus.init, dita2mdx"/>
+  <target name="markdown_docusaurus.init">
+    <property name="args.xsl" location="${dita.plugin.com.example.dir}/xsl/dita2docusaurus.xsl"/>
+    <property name="args.markdown.toc.xsl" location="${dita.plugin.com.example.dir}/xsl/map2docusaurus.xsl"/>
+    <property name="args.markdown.toc.file" value="sidebar.js"/>
+    <property name="args.rellinks" value="nofamily"/>
+  </target>
+</project>
