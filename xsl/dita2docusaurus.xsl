@@ -6,6 +6,22 @@
 
   <xsl:template name="ast-attibutes"/>
 
+<!--  <xsl:template match="*" mode="chapterHead">-->
+<!--    <head>-->
+<!--      <map>-->
+<!--        <entry key="profiles">-->
+<!--          <map>-->
+<!--            <entry key="audience">-->
+<!--              <array>-->
+<!--                <entry>novice</entry>-->
+<!--              </array>-->
+<!--            </entry>-->
+<!--          </map>-->
+<!--        </entry>-->
+<!--      </map>-->
+<!--    </head>-->
+<!--  </xsl:template>-->
+
   <xsl:template match="*[@audience]" priority="1000">
     <component name="Audience">
       <prop name="only" value="{@audience}"/>
