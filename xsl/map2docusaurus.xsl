@@ -6,10 +6,9 @@
                 exclude-result-prefixes="xs js">
 
   <xsl:output method="text"/>
-  <!--  <xsl:import href="plugin:org.lwdita:xsl/map2markdown-cover.xsl"/>-->
 
   <xsl:template match="/">
-    <xsl:text>export default</xsl:text>
+    <xsl:text>export default </xsl:text>
     <xsl:variable name="data" as="element()*">
       <xsl:apply-templates select="*"/>
     </xsl:variable>
@@ -26,58 +25,93 @@
     </js:object>
   </xsl:template>
 
-  <xsl:template match="*[contains-token(@class, 'map/topicref')]">
+  <xsl:template match="*[contains-token(@class, 'map/topicref')]
+                        [empty(@toc) or @toc = 'yes']
+                        [empty(@processing-role) or @processing-role = 'normal']">
     <xsl:variable name="items" select="*[contains-token(@class, 'map/topicref')]"/>
     <xsl:variable name="title" as="node()?"
                   select="(*[contains(@class, ' map/topicmeta ')]/*[contains(@class, ' topic/navtitle ')],
                            @navtitle,
                            *[contains(@class, ' map/topicmeta ')]/*[contains(@class, ' topic/linktext ') or contains(@class, ' map/linktext ')])[1]"/>
-    <xsl:variable name="profiles" as="attribute()*" select="@audience"/>
-    <js:object>
-      <js:entry name="type">
-        <js:string>doc</js:string>
-      </js:entry>
-      <js:entry name="id">
-        <js:string>
-          <xsl:value-of select="replace( @href, '\.[^\.]+?$','')"/>
-        </js:string>
-      </js:entry>
-      <xsl:if test="$title">
-        <js:entry name="label">
-          <js:string>
-            <xsl:value-of select="normalize-space($title)"/>
-          </js:string>
-        </js:entry>
-      </xsl:if>
-      <xsl:if test="$profiles">
-        <js:entry name="customProps">
-          <js:object>
-            <js:entry name="profiles">
+    <xsl:variable name="id" as="xs:string?" select="if (exists(@href)) then replace(@href, '\.[^\.]+?$','') else ()"/>
+    <xsl:choose>
+      <xsl:when test="empty($id) and empty($title)">
+        <xsl:apply-templates select="$items"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="profiles" as="attribute()*" select="@audience, @product, @platform, @otherprops"/>
+        <js:object>
+          <xsl:choose>
+            <xsl:when test="$items">
+              <js:entry name="type">
+                <js:string>category</js:string>
+              </js:entry>
+              <xsl:if test="$id">
+                <js:entry name="link">
+                  <js:object>
+                    <js:entry name="type">
+                      <js:string>doc</js:string>
+                    </js:entry>
+                    <js:entry name="id">
+                      <js:string>
+                        <xsl:value-of select="$id"/>
+                      </js:string>
+                    </js:entry>
+                  </js:object>
+                </js:entry>
+              </xsl:if>
+            </xsl:when>
+            <xsl:otherwise>
+              <js:entry name="type">
+                <js:string>doc</js:string>
+              </js:entry>
+              <xsl:if test="$id">
+                <js:entry name="id">
+                  <js:string>
+                    <xsl:value-of select="$id"/>
+                  </js:string>
+                </js:entry>
+              </xsl:if>
+            </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$title">
+            <js:entry name="label">
+              <js:string>
+                <xsl:value-of select="normalize-space($title)"/>
+              </js:string>
+            </js:entry>
+          </xsl:if>
+          <xsl:if test="$profiles">
+            <js:entry name="customProps">
               <js:object>
-                <xsl:for-each select="$profiles">
-                  <js:entry name="{name()}">
-                    <js:array>
-                      <xsl:for-each select="tokenize(normalize-space())">
-                        <js:string>
-                          <xsl:value-of select="."/>
-                        </js:string>
-                      </xsl:for-each>
-                    </js:array>
-                  </js:entry>
-                </xsl:for-each>
+                <js:entry name="profile">
+                  <js:object>
+                    <xsl:for-each select="$profiles">
+                      <js:entry name="{name()}">
+                        <js:array>
+                          <xsl:for-each select="tokenize(normalize-space())">
+                            <js:string>
+                              <xsl:value-of select="."/>
+                            </js:string>
+                          </xsl:for-each>
+                        </js:array>
+                      </js:entry>
+                    </xsl:for-each>
+                  </js:object>
+                </js:entry>
               </js:object>
             </js:entry>
-          </js:object>
-        </js:entry>
-      </xsl:if>
-      <xsl:if test="$items">
-        <js:entry name="items">
-          <js:array>
-            <xsl:apply-templates select="*[contains-token(@class, 'map/topicref')]"/>
-          </js:array>
-        </js:entry>
-      </xsl:if>
-    </js:object>
+          </xsl:if>
+          <xsl:if test="$items">
+            <js:entry name="items">
+              <js:array>
+                <xsl:apply-templates select="$items"/>
+              </js:array>
+            </js:entry>
+          </xsl:if>
+        </js:object>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:mode name="js"/>
