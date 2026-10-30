@@ -1,4 +1,4 @@
-<plugin id="com.example">
+<plugin id="com.elovirta.docusaurus" version="1.0.0">
   <feature extension="ant.import" file="build.xml"/>
   <transtype name="docusaurus" extends="mdx" desc="Docusaurus"/>
 </plugin>
